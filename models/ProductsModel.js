@@ -51,10 +51,10 @@ const Products = new Schema({
         required : true ,
         default :0
     },
-    countInstock:{
+    countInStock:{
         type : Number ,
         required : true ,
-        default :0
+        default :1
     }
 } , {
         timestamps : true
