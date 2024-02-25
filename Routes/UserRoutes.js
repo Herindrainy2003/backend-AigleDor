@@ -2,8 +2,7 @@ const express = require("express");
 const asyncHandler = require("express-async-handler");
 const { protect, admin } = require ("../Middleware/AuthMiddleware.js");
 const generateToken = require ("../utils/generateToken.js");
-const User = require ("./../Models/UserModel.js");
-
+const UserModel = require("../models/UserModel.js");
 const userRouter = express.Router();
 
 // LOGIN
@@ -11,14 +10,14 @@ userRouter.post(
   "/login",
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (user && (await user.matchPassword(password))) {
+    const user = await UserModel.findOne({ email })
+    if(user && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        token: null,
         token: generateToken(user._id),
         createdAt: user.createdAt,
       });
@@ -35,14 +34,14 @@ userRouter.post(
   asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const userExists = await UserModel.findOne({ email });
 
     if (userExists) {
       res.status(400);
       throw new Error("User already exists");
     }
 
-    const user = await User.create({
+    const user = await UserModel.create({
       name,
       email,
       password,
@@ -68,13 +67,14 @@ userRouter.get(
   "/profile",
   protect,
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id);
+    const user = await UserModel.findById(req.user._id);
 
     if (user) {
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
+        password : user.password,
         isAdmin: user.isAdmin,
         createdAt: user.createdAt,
       });
@@ -90,7 +90,7 @@ userRouter.put(
   "/profile",
   protect,
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id);
+    const user = await UserModel.findById(req.user._id);
 
     if (user) {
       user.name = req.body.name || user.name;
@@ -120,7 +120,7 @@ userRouter.get(
   protect,
   admin,
   asyncHandler(async (req, res) => {
-    const users = await User.find({});
+    const users = await UserModel.find({});
     res.json(users);
   })
 );

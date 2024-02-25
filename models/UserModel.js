@@ -1,8 +1,6 @@
-const mongoose = require('mongoose')
-
-const Schema = mongoose.Schema
-
-const User = new Schema({
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs')
+const UserModel = new mongoose.Schema({
     name : {
         type : String ,
         required : true 
@@ -27,12 +25,12 @@ const User = new Schema({
 )
 
 // Login
-User.methods.matchPassword = async function (enterPassword) {
+UserModel.methods.matchPassword = async function (enterPassword) {
     return await bcrypt.compare(enterPassword, this.password);
   };
-  
-  // Register
-  User.pre("save", async function (next) {
+
+// Register
+UserModel.pre("save", async function (next) {
     if (!this.isModified("password")) {
       next();
     }
@@ -40,4 +38,4 @@ User.methods.matchPassword = async function (enterPassword) {
     this.password = await bcrypt.hash(this.password, salt);
   });
   
-module.exports = mongoose.model('User' , User)
+module.exports = mongoose.model('UserModel' , UserModel);
